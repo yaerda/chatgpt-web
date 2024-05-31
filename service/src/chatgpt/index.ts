@@ -99,7 +99,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 })()
 
 async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process, systemMessage, temperature, top_p } = options
+  const { message, lastContext, process, systemMessage, temperature, top_p, imageUrl } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
 
@@ -116,7 +116,23 @@ async function chatReplyProcess(options: RequestOptions) {
         options = { ...lastContext }
     }
 
-    const response = await api.sendMessage(message, {
+		// 如果使用的是 gpt-4o 模型并且提供了 imageUrl，则调整消息格式
+		let formattedMessage = message;
+		if (model.toLowerCase() === 'gpt-4o' && isNotEmptyString(imageUrl)) {
+			formattedMessage = [
+				{
+					type: 'image_url',
+					image_url: {
+						url: imageUrl,
+					},
+				},
+				{
+					type: 'text',
+					text: message,
+				},
+			];
+		}
+    const response = await api.sendMessage(formattedMessage, {
       ...options,
       onProgress: (partialResponse) => {
         process?.(partialResponse)
