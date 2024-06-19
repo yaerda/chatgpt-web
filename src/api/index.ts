@@ -24,6 +24,7 @@ export function fetchChatAPIProcess<T = any>(
   params: {
     prompt: string
     options?: { conversationId?: string; parentMessageId?: string }
+    imageUrl?: string
     signal?: GenericAbortSignal
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
 ) {
@@ -34,7 +35,9 @@ export function fetchChatAPIProcess<T = any>(
     prompt: params.prompt,
     options: params.options,
   }
-
+  if (params.imageUrl) {
+    data.imageUrl = params.imageUrl // 包含 imageUrl
+  }
   if (authStore.isChatGPTAPI) {
     data = {
       ...data,
